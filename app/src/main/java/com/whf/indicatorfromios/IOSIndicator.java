@@ -229,7 +229,6 @@ public class IOSIndicator extends View {
             } else {
                 paint.setColor(textSelectedColor);
             }
-
             canvas.drawText(itemTitles.get(i), itemWidth / 2f + itemWidth * i, baseLineY, paint);
         }
 

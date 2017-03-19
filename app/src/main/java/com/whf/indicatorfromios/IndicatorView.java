@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 
@@ -17,7 +19,7 @@ import android.view.View;
 
 public class IndicatorView extends View {
 
-    private String[] mTitleArray = new String[]{"消息", "发现", "朋友圈"};
+    private String[] mTitleArray = new String[]{"消息", "发现", "朋友圈","新闻","娱乐","美食"};
     private Path[] mPathArray;
     private Paint mPaint;
 
@@ -32,20 +34,22 @@ public class IndicatorView extends View {
     //圆角半径大小
     private int mRadius = dp2px(5);
 
-
+    //当前Indicator
+    private int mCurIndex = 0;
 
     //未被选定时的背景色
     private int mUnSelectBg = Color.WHITE;
     //被选择定时的背景色
     private int mSelectBg = Color.GRAY;
     //未被选定时的字体颜色
-    private int mUnSelectTextColor = Color.WHITE;
+    private int mUnSelectTextColor = Color.GRAY;
     //被选定时的字体颜色
-    private int mSelectTextColor = Color.GRAY;
+    private int mSelectTextColor = Color.WHITE;
     //线的颜色
     private int mLineColor = Color.GRAY;
 
-    private int mTextPadding;
+
+    private boolean isFirstDraw = true;
 
     public IndicatorView(Context context) {
         super(context);
@@ -56,13 +60,14 @@ public class IndicatorView extends View {
         super(context, attrs);
         init();
     }
+
     private void init() {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setColor(mLineColor);
         mPaint.setStrokeWidth(mLineWidth);
         mPaint.setStyle(Paint.Style.STROKE);
-
-        initPathArray();
+        //使文字居中对齐
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        mPaint.setTextSize(mTextSize);
     }
 
     /**
@@ -85,14 +90,14 @@ public class IndicatorView extends View {
                 path.close();
                 //最后一个
             } else if (i == mTitleArray.length - 1) {
-                path.moveTo(mWidthOfItem * i, 0);
-                path.lineTo(mWidthOfItem - mRadius, 0);
-                path.quadTo(mWidthOfItem, 0, mWidthOfItem, mRadius);
-                path.lineTo(mWidthOfItem, mWidthOfItem - mRadius);
-                path.quadTo(mWidthOfItem, mHeight, mWidthOfItem - mRadius, mHeight);
-                path.lineTo(mWidthOfItem * i, mHeight);
+                int width = getWidth();
+                path.moveTo(width - mWidthOfItem, 0);
+                path.lineTo(width - mRadius, 0);
+                path.quadTo(width, 0, width, mRadius);
+                path.lineTo(width, mHeight - mRadius);
+                path.quadTo(width, mHeight, width - mRadius, mHeight);
+                path.lineTo(width - mWidthOfItem , mHeight);
                 path.close();
-
                 //中间的
             } else {
                 path.moveTo(mWidthOfItem * i, 0);
@@ -106,6 +111,7 @@ public class IndicatorView extends View {
         }
 
     }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -123,6 +129,8 @@ public class IndicatorView extends View {
         } else if (widthMeasureMode == MeasureSpec.EXACTLY) {
             mWidthOfItem = getWidth() / mTitleArray.length;
         }
+
+        initPathArray();
     }
 
 
@@ -134,10 +142,14 @@ public class IndicatorView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawFrame();
+        if (isFirstDraw) {
+            isFirstDraw = false;
+            drawFrame();
+            Log.e("::::::::", "重绘边框");
+        }
         drawCutLine(canvas);
-        drawSelectedBackground(canvas,0);
-        //drawText(canvas);
+        drawSelectedBackground(canvas);
+        drawText(canvas);
     }
 
 
@@ -147,7 +159,7 @@ public class IndicatorView extends View {
     private void drawFrame() {
         GradientDrawable gd = new GradientDrawable();
         gd.setDither(true);
-        gd.setColor(mUnSelectTextColor);
+        gd.setColor(mUnSelectBg);
         gd.setCornerRadius(mRadius);
         gd.setStroke(mLineWidth, mLineColor);
         this.setBackground(gd);
@@ -158,29 +170,39 @@ public class IndicatorView extends View {
      * 绘制分割线
      */
     private void drawCutLine(Canvas canvas) {
+        mPaint.setColor(mLineColor);
         for (int i = 1; i < mTitleArray.length; i++) {
-            canvas.drawLine(mWidthOfItem*i,0,mWidthOfItem*i,mHeight,mPaint);
+            canvas.drawLine(mWidthOfItem * i, 0, mWidthOfItem * i, mHeight, mPaint);
         }
     }
 
     /**
      * 绘制被选择的背景色
      */
-    private void drawSelectedBackground(Canvas canvas,int index) {
+    private void drawSelectedBackground(Canvas canvas) {
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(Color.GRAY);
-        canvas.drawPath(mPathArray[index],mPaint);
+        mPaint.setColor(Color.BLUE);
+        canvas.drawPath(mPathArray[mCurIndex], mPaint);
     }
 
     /**
      * 绘制文本
      */
-//    private void drawText(Canvas canvas) {
-//        mPaint.setTextSize(40);
-//        for (int i = 0; i < mTitleArray.length; i++) {
-//            canvas.drawText(mTitleArray[i], mSingleWidth * i + mSingleWidth / 2, 80, mPaint);
-//        }
-//    }
+    private void drawText(Canvas canvas) {
+        Paint.FontMetrics fontMetrics = mPaint.getFontMetrics();
+        float top = fontMetrics.top;//基线到字体上边框的距离
+        float bottom = fontMetrics.bottom;//基线到字体下边框的距离
+
+        int baseLineY = (int) (mHeight / 2 - top / 2 - bottom / 2);
+        for (int i = 0; i < mTitleArray.length; i++) {
+            if (i == mCurIndex) {
+                mPaint.setColor(Color.RED);
+            } else {
+                mPaint.setColor(mUnSelectTextColor);
+            }
+            canvas.drawText(mTitleArray[i], mWidthOfItem * i + mWidthOfItem / 2, baseLineY, mPaint);
+        }
+    }
 
     /**
      * 设置导航条文本
@@ -205,8 +227,25 @@ public class IndicatorView extends View {
         return (int) (dpValue * scale + 0.5f);
     }
 
-    private int sp2px(float dpValue){
+    private int sp2px(float dpValue) {
         final float scale = getContext().getResources().getDisplayMetrics().scaledDensity;
         return (int) (dpValue * scale + 0.5f);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                for (int i = 0; i < mTitleArray.length; i++) {
+                    if (event.getX() < mWidthOfItem * (i + 1) && event.getX() > mWidthOfItem * i) {
+                        mCurIndex = i;
+                        invalidate();
+                        break;
+                    }
+                }
+                break;
+
+        }
+        return true;
     }
 }

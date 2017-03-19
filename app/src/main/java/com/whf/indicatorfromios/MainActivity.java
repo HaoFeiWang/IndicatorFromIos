@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> list = new ArrayList<>();
         list.add("新浪");
         list.add("网易");
-        list.add("腾讯");
+        list.add("腾讯7777");
 
         iosIndicator.setItemTitles(list);
     }
