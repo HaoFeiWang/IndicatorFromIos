@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="unSelectedBackground" format="color" />
+    <attr name="selectedBackground" format="color" />
+    <attr name="unSelectedTextColor" format="color" />
+    <attr name="selectedTextColor" format="color" />
+    <attr name="lineColor" format="color" />
+
+    <attr name="widthOfItem" format="dimension" />
+    <attr name="textSize" format="dimension" />
+    <attr name="lineWidth" format="dimension" />
+    <attr name="radius" format="dimension"/>
+
+    <declare-styleable name="IndicatorView">
+        <attr name="unSelectedBackground"/>
+        <attr name="selectedBackground" />
+        <attr name="unSelectedTextColor" />
+        <attr name="selectedTextColor" />
+        <attr name="lineColor" />
+
+        <attr name="widthOfItem" />
+        <attr name="textSize" />
+        <attr name="lineWidth" />
+        <attr name="radius" />
+    </declare-styleable>
+
+</resources>

@@ -1,6 +1,7 @@
-package com.whf.indicatorfromios;
+package com.whf.indicatorformios;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -13,6 +14,7 @@ import android.view.View;
 /**
  * 自定义ViewPager的指示器（仿IOS）
  * Created by WHF on 2017/3/18.
+ * @version 1.0.0
  */
 
 public class IndicatorView extends View {
@@ -22,30 +24,30 @@ public class IndicatorView extends View {
     private int mLength;
     private Paint mPaint;
 
-    //高度
+    //高度(初始值为wrap_content时的高度)
     private int mHeight = dp2px(30);
     //单个选项的宽度
-    private int mWidthOfItem = dp2px(80);
+    private int mWidthOfItem;
     //字体大小
-    private int mTextSize = sp2px(15);
+    private int mTextSize ;
     //线的宽度
-    private int mLineWidth = dp2px(1);
+    private int mLineWidth ;
     //圆角半径大小
-    private int mRadius = dp2px(5);
+    private int mRadius ;
 
     //当前Indicator
     private int mCurIndex = 0;
 
     //未被选定时的背景色
-    private int mUnSelectBg = 0xFFFFFFFF;
+    private int mUnSelectBg ;
     //被选择定时的背景色
-    private int mSelectBg = 0xFF666666;
+    private int mSelectBg ;
     //未被选定时的字体颜色
-    private int mUnSelectTextColor = 0xFF666666;
+    private int mUnSelectTextColor;
     //被选定时的字体颜色
-    private int mSelectTextColor = 0xFFFFFFFF;
+    private int mSelectTextColor;
     //线的颜色
-    private int mLineColor = 0xFF666666;
+    private int mLineColor;
 
     private boolean isFirstDraw = true;
 
@@ -59,8 +61,22 @@ public class IndicatorView extends View {
 
     public IndicatorView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs,R.styleable.IndicatorView);
+
+        mUnSelectBg = typedArray.getColor(R.styleable.IndicatorView_unSelectedBackground,0xFFFFFFFF);
+        mSelectBg = typedArray.getColor(R.styleable.IndicatorView_selectedBackground,0xFF666666);
+        mSelectTextColor = typedArray.getColor(R.styleable.IndicatorView_selectedTextColor,0xFFFFFFFF);
+        mUnSelectTextColor = typedArray.getColor(R.styleable.IndicatorView_unSelectedTextColor,0xFF666666);
+        mLineColor = typedArray.getColor(R.styleable.IndicatorView_lineColor,0xFF666666);
+
+        mLineWidth = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_lineWidth,dp2px(1));
+        mTextSize = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_textSize,sp2px(15));
+        mRadius = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_radius,dp2px(5));
+        mWidthOfItem = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_widthOfItem,dp2px(80));
+        typedArray.recycle();
         init();
     }
+
 
     private void init() {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -81,9 +97,9 @@ public class IndicatorView extends View {
         int heightMeasureSize = MeasureSpec.getSize(heightMeasureSpec);
 
         if (mTitleArray == null ) {
-
+            //抛出异常信息
         }else if(mTitleArray.length<2){
-
+            //抛出异常信息
         }else{
             mLength = mTitleArray.length;
         }
@@ -99,9 +115,11 @@ public class IndicatorView extends View {
         if (widthMeasureMode == MeasureSpec.EXACTLY) {
             mWidthOfItem = getWidth() / mLength;
         }
-        if (heightMeasureMode == MeasureSpec.EXACTLY) {
+
+        if(heightMeasureMode == MeasureSpec.EXACTLY){
             mHeight = getHeight();
         }
+
 
         initPathArray();
     }
@@ -175,7 +193,7 @@ public class IndicatorView extends View {
         gd.setColor(mUnSelectBg);
         gd.setCornerRadius(mRadius);
         gd.setStroke(mLineWidth, mLineColor);
-        this.setBackground(gd);
+        this.setBackgroundDrawable(gd);
     }
 
 
