@@ -5,18 +5,17 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     android:orientation="vertical"
-    android:padding="30dp"
     tools:context="com.whf.indicatorfromios.MainActivity">
 
     <com.whf.indicatorfromios.IndicatorView
-        android:layout_width="300dp"
-        android:layout_height="30dp"
-        android:id="@+id/indicatorView"/>
-
-    <com.whf.indicatorfromios.IOSIndicator
-        android:id="@+id/ios"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:layout_marginTop="10dp"/>
+        android:id="@+id/indicatorView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </android.support.v4.view.ViewPager>
 </LinearLayout>
