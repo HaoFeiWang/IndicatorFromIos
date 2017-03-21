@@ -1,6 +1,7 @@
 # 仿IOS风格的ViewPager导航条
 
-![图片效果](https://github.com/HaoFeiWang/IndicatorFromIos/blob/master/screen.gif)
+![静态图片](https://github.com/HaoFeiWang/IndicatorFromIos/blob/master/screen/screen.jpg)
+![动态图片](https://github.com/HaoFeiWang/IndicatorFromIos/blob/master/screen/screen.gif)
 
 ## 添加依赖
 - 在`Project`的`build.gradle`中加入`maven`地址
