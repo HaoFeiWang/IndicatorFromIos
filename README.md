@@ -22,8 +22,8 @@ compile 'com.whf:IndicatorFromIos:1.0.3'
 
 ## 属性介绍
 
-|--|--|
 |属性|说明|
+|--|--|
 |unSelectedBackground|未被选中的Item的背景色|
 |selectedBackground|被选中的Item的背景色|
 |unSelectedTextColor|未被选中的Item中的字体颜色|
