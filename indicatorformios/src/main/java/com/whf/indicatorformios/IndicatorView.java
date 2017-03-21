@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -14,7 +15,8 @@ import android.view.View;
 /**
  * 自定义ViewPager的指示器（仿IOS）
  * Created by WHF on 2017/3/18.
- * @version 1.0.0
+ *
+ * @version 1.0.2
  */
 
 public class IndicatorView extends View {
@@ -25,23 +27,27 @@ public class IndicatorView extends View {
     private Paint mPaint;
 
     //高度(初始值为wrap_content时的高度)
-    private int mHeight = dp2px(30);
-    //单个选项的宽度
+    private static final int NOMAL_mHeight = 30;
+    private static final int NOMAL_WIDTH_ITEM = 80;
+
+    //实际高度
+    private int mHeight;
+    //单个选项的实际宽度
     private int mWidthOfItem;
     //字体大小
-    private int mTextSize ;
+    private int mTextSize;
     //线的宽度
-    private int mLineWidth ;
+    private int mLineWidth;
     //圆角半径大小
-    private int mRadius ;
+    private int mRadius;
 
     //当前Indicator
     private int mCurIndex = 0;
 
     //未被选定时的背景色
-    private int mUnSelectBg ;
+    private int mUnSelectBg;
     //被选择定时的背景色
-    private int mSelectBg ;
+    private int mSelectBg;
     //未被选定时的字体颜色
     private int mUnSelectTextColor;
     //被选定时的字体颜色
@@ -61,18 +67,17 @@ public class IndicatorView extends View {
 
     public IndicatorView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        TypedArray typedArray = context.obtainStyledAttributes(attrs,R.styleable.IndicatorView);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.IndicatorView);
 
-        mUnSelectBg = typedArray.getColor(R.styleable.IndicatorView_unSelectedBackground,0xFFFFFFFF);
-        mSelectBg = typedArray.getColor(R.styleable.IndicatorView_selectedBackground,0xFF666666);
-        mSelectTextColor = typedArray.getColor(R.styleable.IndicatorView_selectedTextColor,0xFFFFFFFF);
-        mUnSelectTextColor = typedArray.getColor(R.styleable.IndicatorView_unSelectedTextColor,0xFF666666);
-        mLineColor = typedArray.getColor(R.styleable.IndicatorView_lineColor,0xFF666666);
+        mUnSelectBg = typedArray.getColor(R.styleable.IndicatorView_unSelectedBackground, 0xFFFFFFFF);
+        mSelectBg = typedArray.getColor(R.styleable.IndicatorView_selectedBackground, 0xFF666666);
+        mSelectTextColor = typedArray.getColor(R.styleable.IndicatorView_selectedTextColor, 0xFFFFFFFF);
+        mUnSelectTextColor = typedArray.getColor(R.styleable.IndicatorView_unSelectedTextColor, 0xFF666666);
+        mLineColor = typedArray.getColor(R.styleable.IndicatorView_lineColor, 0xFF666666);
 
-        mLineWidth = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_lineWidth,dp2px(1));
-        mTextSize = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_textSize,sp2px(15));
-        mRadius = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_radius,dp2px(5));
-        mWidthOfItem = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_widthOfItem,dp2px(80));
+        mLineWidth = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_lineWidth, dp2px(1));
+        mTextSize = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_textSize, sp2px(15));
+        mRadius = typedArray.getDimensionPixelSize(R.styleable.IndicatorView_radius, dp2px(5));
         typedArray.recycle();
         init();
     }
@@ -89,39 +94,49 @@ public class IndicatorView extends View {
 
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    protected void onMeasure(int widthMeasureSpec, int mHeightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, mHeightMeasureSpec);
         int widthMeasureMode = MeasureSpec.getMode(widthMeasureSpec);
-        int heightMeasureMode = MeasureSpec.getMode(heightMeasureSpec);
+        int mHeightMeasureMode = MeasureSpec.getMode(mHeightMeasureSpec);
         int widthMeasureSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightMeasureSize = MeasureSpec.getSize(heightMeasureSpec);
+        int mHeightMeasureSize = MeasureSpec.getSize(mHeightMeasureSpec);
 
-        if (mTitleArray == null ) {
-            //抛出异常信息
-        }else if(mTitleArray.length<2){
-            //抛出异常信息
-        }else{
-            mLength = mTitleArray.length;
-        }
+        initTitleLength();
 
-        if (widthMeasureMode == MeasureSpec.AT_MOST && heightMeasureMode == MeasureSpec.AT_MOST) {
-            setMeasuredDimension(mLength * mWidthOfItem, mHeight);
+        if (widthMeasureMode == MeasureSpec.AT_MOST && mHeightMeasureMode == MeasureSpec.AT_MOST) {
+            setMeasuredDimension(dp2px(mLength * NOMAL_WIDTH_ITEM), dp2px(NOMAL_mHeight));
         } else if (widthMeasureMode == MeasureSpec.AT_MOST) {
-            setMeasuredDimension(mLength * mWidthOfItem, heightMeasureSize);
-        } else if (heightMeasureMode == MeasureSpec.AT_MOST) {
-            setMeasuredDimension(widthMeasureSize, mHeight);
+            setMeasuredDimension(dp2px(mLength * NOMAL_WIDTH_ITEM), mHeightMeasureSize);
+        } else if (mHeightMeasureMode == MeasureSpec.AT_MOST) {
+            setMeasuredDimension(widthMeasureSize, dp2px(NOMAL_mHeight));
         }
 
-        if (widthMeasureMode == MeasureSpec.EXACTLY) {
+        if (mLength != 0) {
             mWidthOfItem = getWidth() / mLength;
         }
-
-        if(heightMeasureMode == MeasureSpec.EXACTLY){
-            mHeight = getHeight();
-        }
-
+        mHeight = getHeight();
 
         initPathArray();
+    }
+
+    /**
+     * 初始化标题数组长度
+     */
+    private void initTitleLength(){
+        try {
+            if (mTitleArray != null) {
+                mLength = mTitleArray.length;
+                if(mLength<2){
+                    //抛出异常
+                    throwException("标题个数小于2");
+                }
+            }else {
+                //抛出异常
+                throwException("标题数组为空");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -178,9 +193,10 @@ public class IndicatorView extends View {
             isFirstDraw = false;
             drawFrame();
         }
-        drawCutLine(canvas);
-        drawSelectedBackground(canvas);
-        drawText(canvas);
+
+        drawCutLine(mPaint, canvas);
+        drawSelectedBackground(mPaint, canvas);
+        drawText(mPaint, canvas);
     }
 
 
@@ -200,41 +216,45 @@ public class IndicatorView extends View {
     /**
      * 绘制分割线
      */
-    private void drawCutLine(Canvas canvas) {
-        mPaint.setColor(mLineColor);
+    private void drawCutLine(Paint paint, Canvas canvas) {
+        paint.setColor(mLineColor);
         for (int i = 1; i < mLength; i++) {
-            canvas.drawLine(mWidthOfItem * i, 0, mWidthOfItem * i, mHeight, mPaint);
+            canvas.drawLine(mWidthOfItem * i, 0, mWidthOfItem * i, mHeight, paint);
         }
     }
 
     /**
      * 绘制被选择的背景色
      */
-    private void drawSelectedBackground(Canvas canvas) {
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(mSelectBg);
-        canvas.drawPath(mPathArray[mCurIndex], mPaint);
+    private void drawSelectedBackground(Paint paint, Canvas canvas) {
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(mSelectBg);
+        if (mPathArray != null && mPathArray.length > 0) {
+            canvas.drawPath(mPathArray[mCurIndex], paint);
+        }
     }
 
     /**
      * 绘制文本
      */
-    private void drawText(Canvas canvas) {
-        Paint.FontMetrics fontMetrics = mPaint.getFontMetrics();
+    private void drawText(Paint paint, Canvas canvas) {
+        Paint.FontMetrics fontMetrics = paint.getFontMetrics();
         float top = fontMetrics.top;//基线到字体上边框的距离
         float bottom = fontMetrics.bottom;//基线到字体下边框的距离
         int baseLineY = (int) (mHeight / 2 - top / 2 - bottom / 2);
 
-        mPaint.setColor(mUnSelectTextColor);
+        paint.setColor(mUnSelectTextColor);
         for (int i = 0; i < mLength; i++) {
             if (i == mCurIndex) {
                 continue;
             }
-            canvas.drawText(mTitleArray[i], mWidthOfItem * i + mWidthOfItem / 2, baseLineY, mPaint);
+            canvas.drawText(mTitleArray[i], mWidthOfItem * i + mWidthOfItem / 2, baseLineY, paint);
         }
-        mPaint.setColor(mSelectTextColor);
-        canvas.drawText(mTitleArray[mCurIndex]
-                , mWidthOfItem * mCurIndex + mWidthOfItem / 2, baseLineY, mPaint);
+        paint.setColor(mSelectTextColor);
+        if (mTitleArray != null) {
+            canvas.drawText(mTitleArray[mCurIndex]
+                    , mWidthOfItem * mCurIndex + mWidthOfItem / 2, baseLineY, paint);
+        }
     }
 
     @Override
@@ -249,13 +269,16 @@ public class IndicatorView extends View {
 
     /**
      * Item的点击事件
+     *
      * @param event
      */
     private void onItemTouch(MotionEvent event) {
         for (int i = 0; i < mLength; i++) {
             if (event.getX() < mWidthOfItem * (i + 1)) {
                 mCurIndex = i;
-                mOnIndicatorItemClickListener.onIndicatorItemClick(mCurIndex);
+                if (mOnIndicatorItemClickListener != null) {
+                    mOnIndicatorItemClickListener.onIndicatorItemClick(mCurIndex);
+                }
                 invalidate();
                 break;
             }
@@ -291,10 +314,11 @@ public class IndicatorView extends View {
 
     /**
      * 设置当前选项卡的位置，从0开始
+     *
      * @param index
      * @return
      */
-    public String setCurIndex(int index){
+    public String setCurIndex(int index) {
         mCurIndex = index;
         invalidate();
         return mTitleArray[index];
@@ -302,16 +326,19 @@ public class IndicatorView extends View {
 
     /**
      * Item点击事件的设置
+     *
      * @param listener
      */
-    public void setOnItemClickListener(OnIndicatorItemClickListener listener){
+    public void setOnItemClickListener(OnIndicatorItemClickListener listener) {
         this.mOnIndicatorItemClickListener = listener;
     }
 
-    public interface OnIndicatorItemClickListener{
+    public interface OnIndicatorItemClickListener {
         void onIndicatorItemClick(int position);
     }
 
-
+    private void throwException(String str) {
+        throw new IllegalArgumentException(str);
+    }
 
 }

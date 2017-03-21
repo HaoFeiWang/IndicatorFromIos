@@ -6,7 +6,6 @@
     <attr name="selectedTextColor" format="color" />
     <attr name="lineColor" format="color" />
 
-    <attr name="widthOfItem" format="dimension" />
     <attr name="textSize" format="dimension" />
     <attr name="lineWidth" format="dimension" />
     <attr name="radius" format="dimension"/>
@@ -18,7 +17,6 @@
         <attr name="selectedTextColor" />
         <attr name="lineColor" />
 
-        <attr name="widthOfItem" />
         <attr name="textSize" />
         <attr name="lineWidth" />
         <attr name="radius" />
