@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mIndicatorView = (IndicatorView) findViewById(R.id.indicatorView);
-        //mIndicatorView.setTitleArray(new String[]{"新闻","娱乐","游戏"});
+        mIndicatorView.setTitleArray(new String[]{"新闻","娱乐","游戏"});
 
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
 
